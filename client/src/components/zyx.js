@@ -1,94 +1,91 @@
-import React, { useEffect, useState } from 'react'
-import CreateIcon from '@mui/icons-material/Create';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import WorkIcon from '@mui/icons-material/Work';
-import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { NavLink, useParams, useHistory } from 'react-router-dom';
+import React, { useState, useRef, useCallback } from 'react';
+import ReactFlow, {
+  ReactFlowProvider,
+  addEdge,
+  useNodesState,
+  useEdgesState,
+  Controls,
+} from 'react-flow-renderer';
 
+import Sidebar from './Sidebar';
 
-const Details = () => {
+import './index.css';
 
-    const [getuserdata, setUserdata] = useState([]);
-    console.log(getuserdata);
+const initialNodes = [
+  {
+    id: '1',
+    type: 'input',
+    data: { label: 'input node' },
+    position: { x: 250, y: 5 },
+  },
+];
 
-    const { id } = useParams("");
-    console.log(id);
+let id = 0;
+const getId = () => `dndnode_${id++}`;
 
-    const history = useHistory();
+const DnDFlow = () => {
+  const reactFlowWrapper = useRef(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
-    const getdata = async () => {
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
-        const res = await fetch(`http://localhost:8003/getuser/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
 
-        const data = await res.json();
-        console.log(data);
+      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+      const type = event.dataTransfer.getData('application/reactflow');
 
-        if (res.status === 422 || !data) {
-            console.log("error ");
+      // check if the dropped element is valid
+      if (typeof type === 'undefined' || !type) {
+        return;
+      }
 
-        } else {
-            setUserdata(data)
-            console.log("get data");
-        }
-    }
+      const position = reactFlowInstance.project({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      });
+      const newNode = {
+        id: getId(),
+        type,
+        position,
+        data: { label: `${type} node` },
+      };
 
-    useEffect(() => {
-        getdata();
-    }, [])
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [reactFlowInstance]
+  );
 
-    const deleteuser = async (id) => {
-
-        const res2 = await fetch(`http://localhost:8003m/deleteuser/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        const deletedata = await res2.json();
-        console.log(deletedata);
-
-        if (res2.status === 422 || !deletedata) {
-            console.log("error");
-        } else {
-            console.log("user deleted");
-            history.push("/");
-        }
-
-    }
-
-    return (
-        <div className="container mt-3">
-            <h1 style={{ fontWeight: 400 }}>FlowChart Details</h1>
-
-            <Card sx={{ maxWidth: 600 }}>
-                <CardContent>
-                    <div className="add_btn">
-                        <NavLink to={`/edit/${getuserdata._id}`}>  <button className="btn btn-primary mx-2"><CreateIcon /></button></NavLink>
-                        <button className="btn btn-danger" onClick={() => deleteuser(getuserdata._id)}><DeleteOutlineIcon /></button>
-                    </div>
-                    <div className="row">
-                        <div className="left_view col-lg-6 col-md-6 col-12">
-                           
-                            <h3 className="mt-3">Name: <span >{getuserdata.name}</span></h3>
-                            <p className="mt-3"><MailOutlineIcon />Email: <span>{getuserdata.email}</span></p>
-                        </div>
-                    </div>
-
-                </CardContent>
-            </Card>
+  return (
+    <div className="dndflow">
+      <ReactFlowProvider>
+        <div className="reactflow-wrapper" ref={reactFlowWrapper}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onInit={setReactFlowInstance}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            fitView
+          >
+            <Controls />
+          </ReactFlow>
         </div>
-    )
-}
+        <Sidebar />
+      </ReactFlowProvider>
+    </div>
+  );
+};
 
-export default Details
+export default DnDFlow;

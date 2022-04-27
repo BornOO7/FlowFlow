@@ -19,8 +19,7 @@ const graphStyles = { width: "100%", height: "500px" };
 const getNodeId = () => `randomnode_${+new Date()}`;
 
 const initialNodes = [
-  { id: '1', data: { label: 'Node 1' }, position: { x: 100, y: 100 } },
-  { id: '2', data: { label: 'Node 2' }, position: { x: 100, y: 200 } },
+  
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
@@ -162,8 +161,8 @@ const SaveRestore = () => {
       onInit={setRfInstance}
     >
       <div className="save__controls">
-        <button onClick={updateuser}>save</button>
-        <button onClick={onRestore}>restore</button>
+        <button onClick={updateuser}>update</button>
+        <button onClick={onRestore}>load</button>
         <button onClick={onAdd}>add node</button>
       </div>
     </ReactFlow>

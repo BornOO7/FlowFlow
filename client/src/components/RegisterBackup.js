@@ -13,12 +13,6 @@ import Sidebar from './Sidebar';
 
 import './dndflow.css';
 
-import TextUpdaterNode from './TextUpdaterNode.js';
-
-import './textupdaternode.css';
-
-const nodeTypes = { textUpdater: TextUpdaterNode };
-
 const initialNodes = [];
 
 let id = 0;
@@ -125,11 +119,11 @@ const DnDFlow = () => {
     
     <div className="row">
         <div class="mb-3 col-lg-6 col-md-6 col-12">
-            <label for="exampleInputEmail1" class="form-label">Cisco ID</label>
+            <label for="exampleInputEmail1" class="form-label">Name</label>
             <input type="text" value={inpval.name} onChange={setdata} name="name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
         </div>
         <div class="mb-3 col-lg-6 col-md-6 col-12">
-            <label for="exampleInputPassword1" class="form-label">Flowchart Name</label>
+            <label for="exampleInputPassword1" class="form-label">email</label>
             <input type="email" value={inpval.email} onChange={setdata} name="email" class="form-control" id="exampleInputPassword1" />
         </div>
 
@@ -147,7 +141,6 @@ const DnDFlow = () => {
             onInit={setReactFlowInstance}
             onDrop={onDrop}
             onDragOver={onDragOver}
-            nodeTypes={nodeTypes}
             fitView
           >
             <div className="save__controls">

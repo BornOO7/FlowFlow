@@ -16,6 +16,7 @@ router.post("/register",async(req,res)=>{
 
     if(!name || !email){
         res.status(422).json("plz fill the data");
+        return;
     }
 
     try {
@@ -33,10 +34,12 @@ router.post("/register",async(req,res)=>{
             await adduser.save();
             res.status(201).json(adduser);
             console.log(adduser);
+            return;
         }
 
     } catch (error) {
         res.status(422).json(error);
+        return;
     }
 })
 
